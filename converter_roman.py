@@ -1,6 +1,7 @@
 opcao = int(input('\nDeseja converter [1] DECIMAL PARA ROMANO ou [2] ROMANO PARA DECIMAL?\n\n[0] SAIR\n\nReposta: '))
 
-while opcao == 1 or opcao == 2 or opcao == 0:
+while opcao != 0 or opcao != 1 or opcao != 2:
+
     if opcao == 1:
         numero_decimal = int(input('\nDigite um número decimal para ser convertido em romano: '))
 
@@ -19,22 +20,24 @@ while opcao == 1 or opcao == 2 or opcao == 0:
             900: 'CM',
             1000: 'M',
         }
-
+            
         if numero_decimal <= 0 or numero_decimal > 3999:
             print("\nNúmero fora do intervalo (1-3999).")
+            continue
 
         else:
             resultado = ''
 
-            for listagem_dicionario in sorted(dicionario_romano.keys(), reverse=True): # ordem descrescente para pegar o maior valor
-                while numero_decimal >= listagem_dicionario:
-                    resultado += dicionario_romano[listagem_dicionario] # converte o valor decimal em romano e adiciona à variável
-                    numero_decimal -= listagem_dicionario # reduz do número decimal o valor convertido
+            for i in sorted(dicionario_romano.keys(), reverse=True): # ordem descrescente para pegar o maior valor
+                while numero_decimal >= i:
+                    resultado += dicionario_romano[i] # converte o valor decimal em romano e adiciona à variável
+                    numero_decimal -= i # reduz do número decimal o valor convertido
             
             print('\nO número em romano é:', resultado)
 
     elif opcao == 2:
         numero_romano = input('\nDigite um número romano para ser convertido em decimal: ')
+        numero_romano.upper()
 
         dicionario_decimal = {
             'I': 1,
@@ -51,21 +54,28 @@ while opcao == 1 or opcao == 2 or opcao == 0:
             'CM': 900,
             'M': 1000,
         }
+        
+        resultado = 0
+        tamanho = len(numero_romano)
+        
+        for i in range(tamanho):
+            if i < tamanho - 1 and dicionario_decimal[numero_romano[i]] < dicionario_decimal[numero_romano[i + 1]]:
+                resultado -= dicionario_decimal[numero_romano[i]] # caractere atual é substituído  do resultado total (em um loop até o fim da condição)
+            else:
+                resultado += dicionario_decimal[numero_romano[i]] # adidicona o valor doc aractere atual ao resultado
 
-        if not char in numero_romano:
-            print("\nNúmero inválido.")
-
-        else:
-            for chave in dicionario_decimal.keys():
-                if numero_romano == chave:
-                    print(f'\nO valor de {numero_romano} convertido em decimal fica: {dicionario_decimal[chave]}')
-                    continue
-
+        print('\nO número em decimal é:', resultado)
+        
+        if resultado < 1 or resultado > 3999:
+            print("\nNúmero fora do intervalo (1-3999).")
+            continue
+        
     elif opcao == 0:
         print('\nPrograma encerrado!\n')
         break
 
     else:
         print('\nOpção inválida.\n')
+        continue
 
-    opcao = int(input('\nDeseja converter [1] DECIMAL PARA ROMANO ou [2] ROMANO PARA DECIMAL?\n\nReposta: '))
+    opcao = int(input('\nDeseja converter [1] DECIMAL PARA ROMANO ou [2] ROMANO PARA DECIMAL?\n\n[0] SAIR\n\nReposta: '))
