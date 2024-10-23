@@ -18,6 +18,8 @@ quantidade_livro_emprestado = 0
 coluna_matricula = ler_membros['matricula']
 coluna_nome = ler_membros['nome']
 
+membros_livros_locados = {}
+
 while True:
     opcao = int(input("\nOlá! Seja bem-vindo ao acervo online da instituição!\n\n[1] - PEGAR LIVROS\n[2] - DEVOLVER LIVROS\n[3] - SAIR\n\nO que você gostaria de fazer? "))
 
@@ -40,14 +42,25 @@ while True:
             quantidade_livro_atual = ler_livros.loc[verificacao_livro, 'quantidade'].values[0] # verifica a quantidade de livros específicos
 
             if quantidade_livro_atual > 0:
-                membro_locacao = int(input("\nDigite sua matrícula: ")) # impedir que o mesmo aluno pegue o mesmo livro 2x
+                membro_locacao = int(input("\nDigite sua matrícula: "))
 
-                if membro_locacao in coluna_matricula.values:
-                    ler_livros.loc[verificacao_livro, 'quantidade'] -= 1
-                    quantidade_livro_emprestado += 1
-                    print(f'\nLivro {livro_locacao} emprestado com sucesso!\n\nVocê o pegou emprestado dia {locacao.strftime("%d/%m/%Y")} e terá que devolvê-lo dia {devolucao.strftime("%d/%m/%Y")}!\n\nAproveite a leitura!\n')
+                if membro_locacao in membros_livros_locados and livro_locacao in membros_livros_locados[membro_locacao]:
+                    print('\nO mesmo aluno não pode pegar o mesmo livro...\n')
+                    print(membros_livros_locados)
+
                 else:
-                    print('\nMembros não pertencentes à instituição não podem alocar livros...\n')
+                    if membro_locacao in coluna_matricula.values:
+                        ler_livros.loc[verificacao_livro, 'quantidade'] -= 1
+                        quantidade_livro_emprestado += 1
+
+                        if membro_locacao in membros_livros_locados: # evita que seja criado outro array para o mesmo aluno
+                            membros_livros_locados[membro_locacao].append((livro_locacao, locacao.strftime("%d/%m/%Y"), devolucao.strftime("%d/%m/%Y")))
+                        else:
+                            membros_livros_locados[membro_locacao] = [livro_locacao, locacao.strftime("%d/%m/%Y"), devolucao.strftime("%d/%m/%Y")]
+
+                        print(f'\nLivro {livro_locacao} emprestado com sucesso!\n\nVocê o pegou emprestado dia {locacao.strftime("%d/%m/%Y")} e terá que devolvê-lo dia {devolucao.strftime("%d/%m/%Y")}!\n\nAproveite a leitura!\n')
+                    else:
+                        print('\nMembros não pertencentes à instituição não podem alocar livros...\n')
             else:
                 print('\nTodos nossos livros desse título estão esgotados... Tente mais tarde!\n\n')
 
@@ -58,6 +71,8 @@ while True:
 
             livro_locacao_autor = input('\nEscolha 1 livro que pertencem a esse autor para fazer a locação: ')
 
+            # corrigir a parte em que a verifica se o mesmo aluno pegou o livro
+
             if livro_locacao_autor.lower() in livros_autor_especifico['titulo'].str.lower().values:
                 quantidade_livro_atual = livros_autor_especifico.loc[livros_autor_especifico['titulo'].str.lower() == livro_locacao_autor.lower(), 'quantidade'] 
 
@@ -67,15 +82,29 @@ while True:
                     if quantidade_livro_atual > 0:
                         membro_locacao = int(input("\nDigite sua matrícula: "))
 
-                        if membro_locacao in coluna_matricula.values:
-                            livros_autor_especifico.loc[livros_autor_especifico['titulo'].str.lower() == livro_locacao_autor.lower(), 'quantidade'] -= 1
-                            print(f'\nLivro {livro_locacao_autor} emprestado com sucesso!\n\nVocê o pegou emprestado dia {locacao.strftime("%d/%m/%Y")} e terá que devolvê-lo dia {devolucao.strftime("%d/%m/%Y")}!\n\nAproveite a leitura!\n')
-                        else:
-                            print('\nMembros não pertencentes à instituição não podem alocar livros...\n')
+                        if membro_locacao in membros_livros_locados:
+                            livros_autor_emprestados = [livro[0] for livro in membros_livros_locados[membro_locacao]] # verifica pelo título se o livro já está emprestado para o aluno
+
+                            if livro_locacao_autor in livros_autor_emprestados:
+                                print('\nO mesmo aluno não pode pegar o mesmo livro...\n')
+                                print(membros_livros_locados)
+                            else:
+                                if membro_locacao in coluna_matricula.values:
+                                    livros_autor_especifico.loc[livros_autor_especifico['titulo'].str.lower() == livro_locacao_autor.lower(), 'quantidade'] -= 1
+
+                                    if membro_locacao in membros_livros_locados: # evita que seja criado outro array para o mesmo aluno
+                                        membros_livros_locados[membro_locacao].append((livro_locacao_autor, locacao.strftime("%d/%m/%Y"), devolucao.strftime("%d/%m/%Y")))
+                                    else:
+                                        membros_livros_locados[membro_locacao] = [livro_locacao_autor, locacao.strftime("%d/%m/%Y"), devolucao.strftime("%d/%m/%Y")]
+
+                                    print(f'\nLivro {livro_locacao_autor} emprestado com sucesso!\n\nVocê o pegou emprestado dia {locacao.strftime("%d/%m/%Y")} e terá que devolvê-lo dia {devolucao.strftime("%d/%m/%Y")}!\n\nAproveite a leitura!\n')
+                                    
                     else:
-                        print('Todos nossos livros desse título foram esgotados...')
+                        print('\nMembros não pertencentes à instituição não podem alocar livros...\n')
                 else:
-                    print('\nLivro não encontrado...\n')
+                    print('Todos nossos livros desse título foram esgotados...')
+            else:
+                print('\nLivro não encontrado...\n')
         else:
             print("\nAutor ou livro não encontrado...\n")
 
