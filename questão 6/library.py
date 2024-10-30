@@ -107,11 +107,17 @@ while True:
             if quantidade_livro_atual > 0:
                 membro_locacao = int(input("\nDigite sua matrícula: "))
                 
-                if membro_locacao in membros_livros_locados and livro_locacao in [livro[0] for livro in membros_livros_locados[membro_locacao]]:
-                    ler_livros.loc[verificacao_livro, 'quantidade'] += 1
-                    quantidade_livro_emprestado -= 1
+                if membro_locacao in membros_livros_locados and any(livro[0].lower() == livro_locacao.lower() for livro in membros_livros_locados[membro_locacao]):
+                    if devolucao.strftime("%d/%m/%Y") <= datetime.today().strftime("%d/%m/%Y"):
+                        ler_livros.loc[verificacao_livro, 'quantidade'] += 1
+                        quantidade_livro_emprestado -= 1
 
-                    print(f'\nLivro {livro_locacao} devolvido com sucesso!\n\nObrigado por devolvê-lo!')
+                        membros_livros_locados[membro_locacao] = [livro for livro in membros_livros_locados[membro_locacao] if livro[0].lower() != livro_locacao.lower()] # remove o livro da lista de locação
+                        
+                        print(f'\nLivro {livro_locacao} devolvido com sucesso!\n\nObrigado por devolvê-lo!')
+                        
+                    else:
+                        print(f'\nLivro {livro_locacao} devolvido com atraso!\n\nVocê terá que pagar uma multa de R$ {10 * int(datetime.today().strftime("%d")) - (int(devolucao.strftime("%d")))} reais.\n\nObrigado por devolvê-lo!')
                 else:
                     print('\nLivro não foi locado por você...')
             else:
@@ -127,13 +133,16 @@ while True:
                 if quantidade_livro_atual > 0:
                     membro_locacao = int(input("\nDigite sua matrícula: "))
                 
-                    if membro_locacao in membros_livros_locados and livro_locacao in [livro[0] for livro in membros_livros_locados[membro_locacao]]:
-                        ler_livros.loc[ler_livros['titulo'].str.lower() == livro_locacao_autor, 'quantidade'] += 1
-                        quantidade_livro_emprestado -= 1
+                    if membro_locacao in membros_livros_locados and any(livro[0].lower() == livro_locacao_autor.lower() for livro in membros_livros_locados[membro_locacao]):
+                        if devolucao.strftime("%d/%m/%Y") <= datetime.today().strftime("%d/%m/%Y"):
+                            ler_livros.loc[ler_livros['titulo'].str.lower() == livro_locacao_autor, 'quantidade'] += 1
+                            quantidade_livro_emprestado -= 1
 
-                        membros_livros_locados[membro_locacao] = [livro for livro in membros_livros_locados[membro_locacao] if livro[0].lower() != livro_locacao_autor]
+                            membros_livros_locados[membro_locacao] = [livro for livro in membros_livros_locados[membro_locacao] if livro[0].lower() != livro_locacao_autor]
 
-                        print(f'\nLivro {livro_locacao} devolvido com sucesso!\n\nObrigado por devolvê-lo!')
+                            print(f'\nLivro {livro_locacao} devolvido com sucesso!\n\nObrigado por devolvê-lo!')
+                        else:
+                            print(f'\nLivro {livro_locacao} devolvido com atraso!\n\nVocê terá que pagar uma multa de R$ {10 * int(datetime.today().strftime("%d")) - (int(devolucao.strftime("%d")))} reais.\n\nObrigado por devolvê-lo!')
                     else:
                         print('\nLivro não foi locado por você...')
                 else:
@@ -141,12 +150,28 @@ while True:
             else:
                 print("\nAutor ou livro não encontrado...\n")
 
-    # existência de atraso (R$ 10, 00 por dia de atraso)
-
     elif opcao == 3:
-        pass
-        # visualização do histórico de dia de alocação, devolução, quantidade de atraso e total a ser pago
+        if not membros_livros_locados:
+            print("\nNenhum histórico de empréstimos encontrado.\n")
+        else:
+            membro_locacao = int(input("\nDigite sua matrícula para visualizar seu histórico: "))
 
+            if membro_locacao in membros_livros_locados:
+                print(f"\nHistórico de Empréstimos para a matrícula {membro_locacao}:\n")
+                for livro, data_locacao, data_devolucao in membros_livros_locados[membro_locacao]:
+                    data_devolucao_dt = datetime.strptime(data_devolucao, "%d/%m/%Y")
+                    dias_atraso = (datetime.today() - data_devolucao_dt).days
+                    
+                    multa = 10 * dias_atraso if dias_atraso > 0 else 0
+                    
+                    print(f"Livro: {livro}")
+                    print(f"Data de Locação: {data_locacao}")
+                    print(f"Data de Devolução Prevista: {data_devolucao}")
+                    print(f"Dias de Atraso: {dias_atraso if dias_atraso > 0 else 0}")
+                    print(f"Total a Pagar: R$ {multa:.2f}\n")
+            else:
+                print("\nMatrícula não encontrada no histórico de empréstimos.\n")
+                
     elif opcao == 4:
         print('\nAté mais!\n\nSaindo...\n')
         break
