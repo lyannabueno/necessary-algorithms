@@ -2,7 +2,7 @@ import random
 import pygame
 
 pygame.mixer.init()
-som_urna = pygame.mixer.Sound('./som_urna_eletronica.mp3')
+som_urna = pygame.mixer.Sound('C:/Users/06006399/Desktop/necessary-algorithms/questão 5/som_urna_eletronica.mp3')
 
 def som_urna_eletronica():
     som_urna.play()
@@ -103,7 +103,11 @@ votos_brancos = 0
 votos_nulos = 0
 
 while True:
-    opcao = int(input('\n[1] CADASTRO DE CANDIDATOS\n[2] CADASTRO DE ELEITORES\n[3] REGISTRAR VOTOS\n[4] RELATÓRIO FINAL\n[0] SAIR\n\nEscolha uma opção: '))
+    try:
+        opcao = int(input('\n[1] CADASTRO DE CANDIDATOS\n[2] CADASTRO DE ELEITORES\n[3] REGISTRAR VOTOS\n[4] RELATÓRIO FINAL\n[0] SAIR\n\nEscolha uma opção: '))
+    except ValueError:
+        print('\nOpção inválida! Por favor, insira um número.')
+        continue
 
     if opcao == 1:
         cadastro_candidatos()
@@ -118,5 +122,4 @@ while True:
         print('\nSaindo...\n')
         break
     else:
-        print('\nOpção inválida!\n')
-        continue
+        print('\nOpção inválida! Por favor, escolha uma opção válida.\n')

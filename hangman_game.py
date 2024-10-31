@@ -40,7 +40,11 @@ def jogar_forca_com_um_jogador(nome_segundo_jogador, palavra_terceiro_jogador, e
     while erros < tentativas:
         print('\nPalavra:', ' '.join(estado_palavra))
 
-        tentativa = input(f'\n{nome_segundo_jogador}, digite uma letra: ').upper().split()[0]
+        tentativa = input(f'\n{nome_segundo_jogador}, digite uma letra: ').upper().strip()
+
+        if not tentativa.isalpha() or len(tentativa) != 1:
+            print("\nDigite apenas uma letra válida.\n")
+            continue
 
         if tentativa in letras_digitadas:
             print('\nEssa letra já foi digitada! Tente outra...\n')
@@ -109,42 +113,55 @@ def jogar_forca_com_dois_jogadores(nome_segundo_jogador, nome_terceiro_jogador, 
             break
 
 def iniciar_jogo():
-    print('\n[1] PAÍSES\n[2] FRUTAS\n[3] OBJETOS\n[4] CARROS\n[0] SAIR\n')
-    tema_terceiro_jogador = int(input('Escolha um tema: '))
+    while True:
+        try:
+            print('\n[1] PAÍSES\n[2] FRUTAS\n[3] OBJETOS\n[4] CARROS\n[0] SAIR\n')
+            tema_terceiro_jogador = int(input('Escolha um tema: '))
+        except ValueError:
+            print("\nOpção inválida! Digite um número de 0 a 4.")
+            continue
 
-    if tema_terceiro_jogador == 0:
-        print('\nObrigado por jogar! Até a próxima.')
-        return
+        if tema_terceiro_jogador == 0:
+            print('\nObrigado por jogar! Até a próxima.')
+            break
 
-    tema = {
-        1: ('PAÍSES', paises_forca),
-        2: ('FRUTAS', frutas_forca),
-        3: ('OBJETOS', objetos_forca),
-        4: ('CARROS', carros_forca)
-    }
+        tema = {
+            1: ('PAÍSES', paises_forca),
+            2: ('FRUTAS', frutas_forca),
+            3: ('OBJETOS', objetos_forca),
+            4: ('CARROS', carros_forca)
+        }
 
-    if tema_terceiro_jogador in tema:
-        _, categoria = tema[tema_terceiro_jogador]
-        print(list(categoria.keys()))
+        if tema_terceiro_jogador in tema:
+            _, categoria = tema[tema_terceiro_jogador]
+            print(list(categoria.keys()))
 
-        palavra_terceiro_jogador = input('\nEscolha uma palavra: ').strip().upper()
-        if palavra_terceiro_jogador in categoria:
-            print('\nDica:', categoria[palavra_terceiro_jogador])
-            estado_palavra = ['_' for _ in palavra_terceiro_jogador]
-            print('\nO boneco se inicia vazio e com 0 tentativas.\n')
+            palavra_terceiro_jogador = input('\nEscolha uma palavra: ').strip().upper()
+            if palavra_terceiro_jogador in categoria:
+                print('\nDica:', categoria[palavra_terceiro_jogador])
+                estado_palavra = ['_' for _ in palavra_terceiro_jogador]
+                print('\nO boneco se inicia vazio e com 0 tentativas.\n')
 
-            nome_segundo_jogador = input('Digite o nome do 1º jogador: ').split()[0]
-            opcao_teceiro_jogador = int(input('\n[1] SIM\n[2] NÃO\n\nDeseja adicionar mais de 1 jogador? '))
+                nome_segundo_jogador = input('Digite o nome do 1º jogador: ').split()[0]
+                
+                while True:
+                    try:
+                        opcao_teceiro_jogador = int(input('\n[1] SIM\n[2] NÃO\n\nDeseja adicionar mais de 1 jogador? '))
+                        if opcao_teceiro_jogador not in [1, 2]:
+                            raise ValueError
+                        break
+                    except ValueError:
+                        print("\nDigite apenas 1 para SIM ou 2 para NÃO.")
 
-            if opcao_teceiro_jogador == 1:
-                nome_terceiro_jogador = input('\nDigite o nome do 2º jogador: ').split()[0]
-                jogar_forca_com_dois_jogadores(nome_segundo_jogador, nome_terceiro_jogador, palavra_terceiro_jogador, estado_palavra, [])
+                if opcao_teceiro_jogador == 1:
+                    nome_terceiro_jogador = input('\nDigite o nome do 2º jogador: ').split()[0]
+                    jogar_forca_com_dois_jogadores(nome_segundo_jogador, nome_terceiro_jogador, palavra_terceiro_jogador, estado_palavra, [])
+                else:
+                    jogar_forca_com_um_jogador(nome_segundo_jogador, palavra_terceiro_jogador, estado_palavra, [])
             else:
-                jogar_forca_com_um_jogador(nome_segundo_jogador, palavra_terceiro_jogador, estado_palavra, [])
+                print('\nPalavra não encontrada.')
         else:
-            print('Palavra não encontrada.')
-
-    iniciar_jogo()
+            print("\nOpção de tema inválida. Tente novamente.")
 
 paises_forca = {
     'BRASIL': 'Copa do Mundo de 2002',
